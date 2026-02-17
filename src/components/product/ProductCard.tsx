@@ -8,7 +8,7 @@ interface Props {
   index: number;
   isFavorite: boolean;
   onAddToCart: (product: Product, e: React.MouseEvent) => void;
-  onToggleFav: (id: number, e: React.MouseEvent) => void;
+  onToggleFav: (id: string, e: React.MouseEvent) => void;
 }
 
 export default function ProductCard({
@@ -27,11 +27,8 @@ export default function ProductCard({
       whileTap={{ scale: 0.97 }}
     >
       {/* ── Image area ── */}
-      <div className="card-img-wrap" style={{ background: product.color }}>
-        <span aria-hidden="true">{product.emoji}</span>
-
-        <span className="card-tag">{product.tag}</span>
-
+      <div className="card-img-wrap">
+        {/* Wishlist button */}
         <button
           className="card-fav"
           aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}

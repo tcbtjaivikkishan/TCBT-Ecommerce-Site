@@ -1,8 +1,5 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  src: "./src",
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

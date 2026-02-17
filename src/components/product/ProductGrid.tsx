@@ -5,9 +5,9 @@ import ProductCard from "./ProductCard";
 
 interface Props {
   products: Product[];
-  favorites: number[];
+  favorites: string[];
   onAddToCart: (product: Product, e: React.MouseEvent) => void;
-  onToggleFav: (id: number, e: React.MouseEvent) => void;
+  onToggleFav: (id: string, e: React.MouseEvent) => void;
   onClearFilters: () => void;
 }
 

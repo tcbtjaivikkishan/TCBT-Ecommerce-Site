@@ -308,7 +308,7 @@ export default function ProductsPage() {
   const [activePrice,    setActivePrice]    = useState<PriceRange>("All Prices");
   const [search,         setSearch]         = useState("");
   const [cart,           setCart]           = useState<Product[]>([]);
-  const [favorites,      setFavorites]      = useState<number[]>([]);
+  const [favorites,      setFavorites]      = useState<string[]>([]);
   const [toast,          setToast]          = useState("");
   const [activeNav,      setActiveNav]      = useState("shop");
 
@@ -325,12 +325,15 @@ export default function ProductsPage() {
     showToast(`${product.name} added 🌿`);
   };
 
-  const handleToggleFav = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
+  const handleToggleFav = (id: string, e: React.MouseEvent) => {
+  e.stopPropagation();
+  setFavorites((prev) =>
+    prev.includes(id)
+      ? prev.filter((x) => x !== id)
+      : [...prev, id]
+  );
+};
+
 
   const handleClearFilters = () => {
     setActiveCategory("All");

@@ -9,6 +9,7 @@ export interface Product {
   }[];
   stock: number;
   category: string;
+  
 }
 
 export const mockProducts: Product[] = [
