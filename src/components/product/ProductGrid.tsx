@@ -20,11 +20,14 @@ export default function ProductGrid({
 }: Props) {
   if (products.length === 0) {
     return (
-      <div className="empty">
-        <div className="empty-emoji">🌾</div>
-        <h3>No plants found</h3>
-        <p>Try adjusting your filters or search</p>
-        <button className="empty-btn" onClick={onClearFilters}>
+      <div className="text-center py-16 px-5">
+        <div className="text-5xl mb-3">🌾</div>
+        <h3 className="font-serif text-xl text-[#1a1612] mb-2">No plants found</h3>
+        <p className="text-sm text-[#8a7f72]">Try adjusting your filters or search</p>
+        <button 
+          className="mt-4 px-6 py-2.5 bg-[#1a3a2a] text-white border-none rounded-full text-sm font-medium cursor-pointer" 
+          onClick={onClearFilters}
+        >
           Clear filters
         </button>
       </div>
@@ -32,7 +35,7 @@ export default function ProductGrid({
   }
 
   return (
-    <div className="product-grid">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:gap-5">
       {products.map((product, i) => (
         <ProductCard
           key={product.id}
