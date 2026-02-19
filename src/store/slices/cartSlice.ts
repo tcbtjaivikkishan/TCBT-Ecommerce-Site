@@ -8,27 +8,41 @@ export type CartItem = {
   qty: number;
 };
 
+type AddToCartPayload = Omit<CartItem, "qty"> & {
+  qty?: number;
+};
+
 const initialState: { items: CartItem[] } = {
   items: [],
 };
+
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<Omit<CartItem, "qty">>) => {
-      const existing = state.items.find((i) => i.id === action.payload.id);
-      if (existing) existing.qty += 1;
-      else state.items.push({ ...action.payload, qty: 1 });
+    addToCart: (state, action: PayloadAction<AddToCartPayload>) => {
+      const { id, qty = 1 } = action.payload;
+
+      const existing = state.items.find((i) => i.id === id);
+
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        state.items.push({ ...action.payload, qty });
+      }
     },
+
     removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((i) => i.id !== action.payload);
     },
+
     setQty: (state, action: PayloadAction<{ id: string; qty: number }>) => {
       const item = state.items.find((i) => i.id === action.payload.id);
       if (!item) return;
       item.qty = Math.max(1, action.payload.qty);
     },
+
     clearCart: (state) => {
       state.items = [];
     },

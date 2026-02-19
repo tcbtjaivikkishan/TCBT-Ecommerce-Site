@@ -12,14 +12,18 @@ import {
 
 import ProductFilters from "@/components/product/ProductFilters";
 import ProductGrid    from "@/components/product/ProductGrid";
+import { useAppDispatch } from "@/store/hooks";
+import { addToCart } from "@/store/slices/cartSlice";
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ProductsPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
-  const [activePrice,    setActivePrice]    = useState<PriceRange>("All Prices");
-  const [search,         setSearch]         = useState("");
-  const [favorites,      setFavorites]      = useState<string[]>([]);
-  const [toast,          setToast]          = useState("");
+  const [activePrice, setActivePrice] = useState<PriceRange>("All Prices");
+  const [search, setSearch] = useState("");
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [toast, setToast] = useState("");
+
+  const dispatch = useAppDispatch();
 
   const filtered = filterProducts(mockProducts, activeCategory, activePrice, search);
 
@@ -30,17 +34,25 @@ export default function ProductsPage() {
 
   const handleAddToCart = (product: Product, e: React.MouseEvent) => {
     e.stopPropagation();
-    showToast(`${product.name} added 🌿`);
+dispatch(
+      addToCart({
+        id: product.id + "-" + product.sizes[0].label,
+        title: `${product.name} (${product.sizes[0].label})`,
+        price: product.sizes[0].price,
+        image: product.images[0],
+      })
+    );    showToast(`${product.name} added 🌿`);
   };
 
   const handleToggleFav = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFavorites((prev) =>
-      prev.includes(id)
-        ? prev.filter((x) => x !== id)
-        : [...prev, id]
-    );
-  };
+  e.stopPropagation();
+  setFavorites((prev) =>
+    prev.includes(id)
+      ? prev.filter((x) => x !== id)
+      : [...prev, id]
+  );
+};
+
 
   const handleClearFilters = () => {
     setActiveCategory("All");
@@ -49,15 +61,16 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] pt-20">
-      {/* ── Filters + sort bar ── */}
-      <ProductFilters
-        activeCategory={activeCategory}
-        activePrice={activePrice}
-        resultCount={filtered.length}
-        onCategoryChange={setActiveCategory}
-        onPriceChange={setActivePrice}
-      />
+      <div className="page">
+
+        {/* ── Filters + sort bar ── */}
+        <ProductFilters
+          activeCategory={activeCategory}
+          activePrice={activePrice}
+          resultCount={filtered.length}
+          onCategoryChange={setActiveCategory}
+          onPriceChange={setActivePrice}
+        />
 
       {/* ── Product grid ── */}
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24">

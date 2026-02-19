@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Product } from "@/lib/mockData";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
+import { useAppDispatch } from "@/store/hooks";
+import { addToCart } from "@/store/slices/cartSlice";
+import { useRouter } from "next/navigation";
 
 interface Props {
   product: Product;
@@ -17,7 +20,7 @@ const fadeUp: Variants = {
     transition: {
       delay: i * 0.07,
       duration: 0.45,
-      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+      ease: [0.22, 1, 0.36, 1],
     },
   }),
 };
@@ -25,13 +28,28 @@ const fadeUp: Variants = {
 const ProductInfo = ({ product }: Props) => {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [showViewCart, setShowViewCart] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
   const lowStock = product.stock <= 10;
 
   const handleAddToCart = () => {
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    dispatch(
+      addToCart({
+        id: product.id + "-" + selectedSize.label,
+        title: `${product.name} (${selectedSize.label})`,
+        price: selectedSize.price,
+        image: product.images[0],
+        qty,
+      })
+    );
+
+    setShowViewCart(true);
+    setQty(1);
+
+    setTimeout(() => setShowViewCart(false), 5000);
   };
 
   return (
@@ -40,7 +58,7 @@ const ProductInfo = ({ product }: Props) => {
       {/* Decorative accent */}
       <div className="absolute -top-2 left-0 w-12 h-0.5 bg-gradient-to-r from-[#3d6b4f] to-transparent rounded-full" />
 
-      {/* ── Header ───────────────────────── */}
+      {/* HEADER */}
       <motion.div
         custom={0}
         initial="hidden"
@@ -48,30 +66,25 @@ const ProductInfo = ({ product }: Props) => {
         variants={fadeUp}
         className="pt-4 pb-6 border-b border-stone-200/80"
       >
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="space-y-1.5">
-            <p className="font-['DM_Sans',sans-serif] text-xs tracking-[0.18em] uppercase text-[#3d6b4f]/70 font-medium">
+        <div className="flex justify-between flex-wrap gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#3d6b4f]/70">
               Botanical Collection
             </p>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-[2.6rem] font-semibold leading-[1.15] tracking-[-0.01em] text-stone-900">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-stone-900">
               {product.name}
             </h1>
           </div>
 
           {lowStock && (
-            <motion.span
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="font-['DM_Sans',sans-serif] shrink-0 mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-amber-50 text-amber-700 border border-amber-200/80 shadow-sm"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="px-3 py-1.5 text-xs rounded-full bg-amber-50 text-amber-700 border">
               Only {product.stock} left
-            </motion.span>
+            </span>
           )}
         </div>
 
-        {/* 🔥 Animated Price */}
+        {/* PRICE */}
         <div className="mt-4 flex items-baseline gap-3">
           <AnimatePresence mode="wait">
             <motion.span
@@ -79,69 +92,55 @@ const ProductInfo = ({ product }: Props) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="text-4xl font-bold text-[#2d5a3d] tracking-tight"
+              className="text-4xl font-bold text-[#2d5a3d]"
             >
               ₹{(selectedSize.price * qty).toFixed(2)}
             </motion.span>
           </AnimatePresence>
 
-          <span className="font-['DM_Sans',sans-serif] text-sm text-stone-400">
-            incl. tax
-          </span>
+          <span className="text-sm text-stone-400">incl. tax</span>
         </div>
       </motion.div>
 
-      {/* ── Description ───────────────────── */}
+      {/* DESCRIPTION */}
       <motion.p
         custom={1}
         initial="hidden"
         animate="visible"
         variants={fadeUp}
-        className="py-6 font-['DM_Sans',sans-serif] text-[0.95rem] leading-relaxed text-stone-500 max-w-[38rem] border-b border-stone-200/80"
+        className="py-6 text-stone-500 border-b"
       >
         {product.description}
       </motion.p>
 
-      {/* ── Size Selector ─────────────────── */}
+      {/* SIZE SELECTOR */}
       <motion.div
         custom={2}
         initial="hidden"
         animate="visible"
         variants={fadeUp}
-        className="py-6 border-b border-stone-200/80"
+        className="py-6 border-b"
       >
-        <h4 className="font-['DM_Sans',sans-serif] text-xs font-semibold tracking-[0.14em] uppercase text-stone-500 mb-3">
-          Size
-        </h4>
+        <h4 className="text-xs uppercase mb-3">Size</h4>
 
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex gap-2.5 flex-wrap">
           {product.sizes.map((s) => (
-            <motion.button
+            <button
               key={s.label}
-              whileTap={{ scale: 0.93 }}
               onClick={() => setSelectedSize(s)}
-              className={`relative px-5 py-2 rounded-xl font-['DM_Sans',sans-serif] text-sm font-medium transition-all duration-300 ${
+              className={`px-5 py-2 rounded-xl text-sm transition ${
                 selectedSize.label === s.label
-                  ? "text-white shadow-md shadow-[#3d6b4f]/30"
-                  : "bg-white text-stone-600 border border-stone-200 hover:border-[#3d6b4f]/50 hover:text-[#3d6b4f]"
+                  ? "bg-[#3d6b4f] text-white"
+                  : "border hover:border-[#3d6b4f]"
               }`}
             >
-              {selectedSize.label === s.label && (
-                <motion.span
-                  layoutId="size-pill"
-                  className="absolute inset-0 rounded-xl bg-[#3d6b4f]"
-                  style={{ zIndex: -1 }}
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
-              )}
               {s.label}
-            </motion.button>
+            </button>
           ))}
         </div>
       </motion.div>
 
-      {/* ── Quantity + CTA ────────────────── */}
+      {/* QUANTITY + CTA */}
       <motion.div
         custom={3}
         initial="hidden"
@@ -149,48 +148,54 @@ const ProductInfo = ({ product }: Props) => {
         variants={fadeUp}
         className="py-6 space-y-4"
       >
-        <div className="flex items-center gap-0 w-fit rounded-2xl border border-stone-200 overflow-hidden bg-white shadow-sm">
+        {/* Quantity */}
+        <div className="flex items-center border rounded-2xl w-fit">
           <button
             onClick={() => setQty((p) => Math.max(1, p - 1))}
-            className="w-11 h-11 flex items-center justify-center text-lg text-stone-500 hover:bg-stone-50"
+            className="w-11 h-11"
           >
             −
           </button>
 
-          <div className="w-px h-5 bg-stone-200" />
-
-          <span className="w-12 text-center text-sm font-semibold text-stone-800">
-            {qty}
-          </span>
-
-          <div className="w-px h-5 bg-stone-200" />
+          <span className="w-12 text-center">{qty}</span>
 
           <button
             onClick={() => setQty((p) => p + 1)}
-            className="w-11 h-11 flex items-center justify-center text-lg text-stone-500 hover:bg-stone-50"
+            className="w-11 h-11"
           >
             +
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <motion.button
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.97 }}
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3">
+
+          <button
             onClick={handleAddToCart}
-            className="flex-1 py-3.5 px-6 rounded-2xl border border-[#3d6b4f] font-medium text-sm text-[#3d6b4f] hover:shadow-md hover:shadow-[#3d6b4f]/10 transition-all"
+            className="flex-1 py-3.5 border border-[#3d6b4f] text-[#3d6b4f] rounded-2xl"
           >
             Add to Cart
-          </motion.button>
+          </button>
 
-          <motion.button
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex-1 py-3.5 px-6 rounded-2xl bg-[#2d5a3d] text-white shadow-lg shadow-[#2d5a3d]/25 hover:bg-[#3d6b4f] transition-all"
+          <button
+            className="flex-1 py-3.5 bg-[#2d5a3d] text-white rounded-2xl"
           >
             Buy Now
-          </motion.button>
+          </button>
+
         </div>
+
+        {/* VIEW CART */}
+        {showViewCart && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={() => router.push("/cart")}
+            className="w-full py-3 bg-stone-900 text-white rounded-2xl"
+          >
+            View Cart
+          </motion.button>
+        )}
       </motion.div>
     </div>
   );
